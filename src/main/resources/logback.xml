@@ -1,0 +1,23 @@
+<configuration scan="true">
+
+  <!-- this date pattern conform to ISO date format -->
+  <property name="DEFAULT_PATTERN" value="[%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSZ}] [%p] [%c] %m%n" />
+  <property name="DIALOG_PATTERN" value="[%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSZ}] [%p] [%X{dialogId}] %m%n" />
+
+  <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${DEFAULT_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="com.nuecho.rivr">
+    <level value="TRACE" />
+  </logger>
+
+  <root level="TRACE">
+    <appender-ref ref="consoleAppender" />
+  </root>
+
+</configuration>
+
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+  <display-name>Rivr Hello World</display-name>
+
+  <servlet>
+    <servlet-name>Dialogue</servlet-name>
+    <servlet-class>com.nuecho.rivr.voicexml.servlet.VoiceXmlDialogueServlet</servlet-class>
+
+    <init-param>
+      <param-name>dialogueFactory.class</param-name>
+      <param-value>com.nuecho.rivr.samples.voicemail.dialogue.VoicemailDialogueFactory</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>dialogue.class</param-name>
+      <param-value>com.nuecho.rivr.samples.voicemail.dialogue.VoicemailDialogue</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>sessionScanPeriod</param-name>
+      <param-value>2m</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>sessionTimeout</param-name>
+      <param-value>30m</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>dialogueTimeout</param-name>
+      <param-value>5m</param-value>
+    </init-param>
+
+
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Dialogue</servlet-name>
+    <url-pattern>/dialogue/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
