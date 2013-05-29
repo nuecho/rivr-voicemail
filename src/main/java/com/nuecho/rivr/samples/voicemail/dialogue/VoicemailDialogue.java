@@ -5,6 +5,7 @@
 package com.nuecho.rivr.samples.voicemail.dialogue;
 
 import static com.nuecho.rivr.samples.voicemail.helpers.FluentInteractionBuilder.*;
+import static java.lang.String.*;
 
 import javax.json.*;
 
@@ -37,6 +38,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
     private static final String CAUSE_PROPERTY = "cause";
 
     private final DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> mChannel;
+    private String mContextPath;
 
     public VoicemailDialogue(DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> channel) {
         mChannel = channel;
@@ -44,6 +46,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     @Override
     public VoiceXmlLastTurn run(VoiceXmlFirstTurn firstTurn, VoiceXmlDialogueContext context) throws Exception {
+        mContextPath = context.getContextPath();
         String status;
         JsonObjectBuilder resultObjectBuilder = JsonUtils.createObjectBuilder();
         try {
@@ -67,21 +70,20 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private User login() throws Timeout, InterruptedException, HangUp, PlatformError {
         // C01
-        InteractionTurn askLogin = newInteraction("ask-login").synthesisWithDtmf("ask-login", 4).build();
+        InteractionTurn askLogin = audioWithDtmf("ask-login", "vm-login", 4);
         // C02
-        InteractionTurn askPassword = newInteraction("ask-password").synthesisWithDtmf("ask-password", 4).build();
+        InteractionTurn askPassword = audioWithDtmf("ask-password", "vm-password", 4);
         // C06
-        InteractionTurn incorrect = newInteraction("incorrect-mailbox").synthesisWithDtmf("incorrect-mailbox", 4).build();
-        
+        InteractionTurn incorrect = audioWithDtmf("incorrect-mailbox", "vm-incorrect-mailbox", 4);
+
         String username;
         String password;
         do {
+            // TODO no-match/no-input
             username = processDtmfTurn(askLogin);
             password = processDtmfTurn(askPassword);
             // Subsequent tries must use the other interaction.
-            if (askLogin != incorrect) {
-                askLogin = incorrect;
-            }
+            askLogin = incorrect;
         } while (!validate(username, password)); // TODO max-no-match?
 
         return new User(username, password);
@@ -92,14 +94,23 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return username.equals("4069") && password.equals("6522");
     }
 
+    private InteractionTurn audioWithDtmf(String interactionName, String audio, int dtmfLength) {
+        return newInteraction(interactionName).dtmfBargeIn(dtmfLength).audio(audioPath(audio)).build();
+    }
+
+    private String audioPath(String audio) {
+        return format("%s/original/%s.ulaw", mContextPath, audio);
+    }
+
     private String processDtmfTurn(InteractionTurn interaction) throws Timeout, InterruptedException, HangUp,
             PlatformError {
         // Is there a better way?
-        return processTurn(interaction).getRecognitionInfo()
-                                       .getRecognitionResult()
-                                       .getJsonObject(0)
-                                       .getJsonString("interpretation")
-                                       .getString();
+        String rawDtmfs = processTurn(interaction).getRecognitionInfo()
+                                                  .getRecognitionResult()
+                                                  .getJsonObject(0)
+                                                  .getJsonString("utterance")
+                                                  .getString();
+        return rawDtmfs.replace(" ", "");
     }
 
     private VoiceXmlInputTurn processTurn(VoiceXmlOutputTurn outputTurn) throws Timeout, InterruptedException, HangUp,
