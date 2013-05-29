@@ -15,6 +15,7 @@ import com.nuecho.rivr.core.util.*;
 import com.nuecho.rivr.voicexml.rendering.voicexml.*;
 import com.nuecho.rivr.voicexml.test.*;
 import com.nuecho.rivr.voicexml.turn.first.*;
+import com.nuecho.rivr.voicexml.turn.input.*;
 import com.nuecho.rivr.voicexml.turn.last.*;
 import com.nuecho.rivr.voicexml.turn.output.*;
 import com.nuecho.rivr.voicexml.util.json.*;
@@ -39,6 +40,8 @@ public class DialogueTests {
         sendDtmfAnswer("4069");
         assertThat(mDialogueChannel, lastInteractionNameIs("ask-password"));
         sendDtmfAnswer("6522");
+        assertThat(mDialogueChannel, lastInteractionNameIs("main-menu"));
+        mDialogueChannel.processHangup();
     }
 
     @Test
@@ -51,7 +54,30 @@ public class DialogueTests {
         sendDtmfAnswer("4069");
         assertThat(mDialogueChannel, lastInteractionNameIs("ask-password"));
         sendDtmfAnswer("6522");
+        assertThat(mDialogueChannel, lastInteractionNameIs("main-menu"));
+        mDialogueChannel.processHangup();
+    }
 
+    @Test
+    public void changeMailboxName() throws Exception {
+        sendDtmfAnswer("4069");
+        sendDtmfAnswer("6522");
+        sendDtmfAnswer("0");
+        assertThat(mDialogueChannel, lastInteractionNameIs("mailbox-options"));
+        sendDtmfAnswer("3");
+        assertThat(mDialogueChannel, lastInteractionNameIs("record-name"));
+        RecordingData recordingData = new RecordingData(new byte[0], "audio/x-wav", "name");
+        RecordingInfo recordingInfo = new RecordingInfo(recordingData, TimeValue.seconds(5), false, "#");
+        mDialogueChannel.processRecording(recordingInfo);
+        // TODO: Assert something about the recording
+        assertThat(mDialogueChannel, lastInteractionNameIs("confirm-name"));
+        sendDtmfAnswer("1");
+        assertThat(mDialogueChannel, lastInteractionNameIs("message-saved"));
+        mDialogueChannel.processNoInput();
+        assertThat(mDialogueChannel, lastInteractionNameIs("mailbox-options"));
+        sendDtmfAnswer("*");
+        assertThat(mDialogueChannel, lastInteractionNameIs("main-menu"));
+        mDialogueChannel.processHangup();
     }
 
     private Step<VoiceXmlOutputTurn, VoiceXmlLastTurn> startDialogue(VoiceXmlFirstTurn firstTurn) {

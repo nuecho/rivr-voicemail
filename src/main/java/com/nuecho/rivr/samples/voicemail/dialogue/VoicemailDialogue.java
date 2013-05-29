@@ -51,6 +51,28 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         JsonObjectBuilder resultObjectBuilder = JsonUtils.createObjectBuilder();
         try {
             login();
+
+            // C03
+            InteractionTurn mainMenu = newInteraction("main-menu").dtmfBargeIn(1)
+                                                                  .audio(audioPath("vm-youhave"))
+                                                                  .synthesis("0")
+                                                                  .audio(audioPath("vm-received"))
+                                                                  .audio(audioPath("vm-opts"))
+                                                                  .build();
+            InteractionTurn mainMenuReEnter = audioWithDtmf("main-menu", "vm-opts", 1);
+            String menu;
+            do {
+                menu = processDtmfTurn(mainMenu);
+                mainMenu = mainMenuReEnter;
+                if ("0".equals(menu)) {
+                    mailboxConfigure();
+                } else if ("1".equals(menu)) {
+                    messageMenu();
+                } else if ("3".equals(menu)) {
+                    advancedOptions();
+                }
+            } while (!"#".equals(menu));
+
             status = STATUS_SUCCESS;
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
@@ -66,6 +88,47 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         VariableDeclarationList variables = VariableDeclarationList.create(resultObjectBuilder.build());
 
         return new VoiceXmlReturnTurn("result", variables);
+    }
+
+    private void mailboxConfigure() throws Timeout, InterruptedException, HangUp, PlatformError {
+        // C07
+        InteractionTurn options = audioWithDtmf("mailbox-options", "vm-options", 1);
+
+        // C08
+        InteractionTurn record = newInteraction("record-name").audio(audioPath("vm-rec-name")).record().build();
+
+        // C09
+        InteractionTurn review = audioWithDtmf("confirm-name", "vm-review", 1);
+
+        // C10
+        InteractionTurn saved = audio("message-saved", "vm-msgsaved");
+
+        String selectedOption;
+        do {
+            selectedOption = processDtmfTurn(options);
+            if ("3".equals(selectedOption)) {
+                processTurn(record).getRecordingInfo();
+                String reviewOption = processDtmfTurn(review);
+                // 1-save, 2-listen and review, 3-rerecord
+                if ("1".equals(reviewOption)) {
+                    processTurn(saved);
+                }
+            }
+        } while (!"*".equals(selectedOption));
+    }
+
+    private InteractionTurn audio(String interactionName, String audioName) {
+        return newInteraction(interactionName).audio(audioPath(audioName)).build();
+    }
+
+    private void messageMenu() {
+        // TODO Auto-generated method stub
+
+    }
+
+    private void advancedOptions() {
+        // TODO Auto-generated method stub
+
     }
 
     private User login() throws Timeout, InterruptedException, HangUp, PlatformError {

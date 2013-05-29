@@ -17,6 +17,7 @@ import com.nuecho.rivr.voicexml.turn.output.interaction.*;
  * @author Nu Echo Inc.
  */
 public final class FluentInteractionBuilder {
+    private static final String RECORDING_LOCATION = "application.recording";
     private final InteractionBuilder mBuilder;
     private DtmfRecognitionConfiguration mDtmfConfig;
     private TimeValue mNoInputTimeout = TimeValue.seconds(10);
@@ -80,6 +81,19 @@ public final class FluentInteractionBuilder {
     }
 
     /**
+     * Replay a previously recored message.
+     */
+    public FluentInteractionBuilder replayRecording() {
+        mBuilder.addPrompt(new ClientSideRecording(RECORDING_LOCATION));
+        return this;
+    }
+
+    /**
+     * Build the currently configured interaction. If barge-in was enabled (
+     * {@link #dtmfBargeIn(int)}, the same configuration will be used to do
+     * recognition at the end with the timeout specified in
+     * {@link #noInputTimeout(TimeValue)} (defaults to 10s).
+     * 
      * @return The interaction turn configured via this builder.
      */
     public InteractionTurn build() {
@@ -87,6 +101,25 @@ public final class FluentInteractionBuilder {
             mBuilder.setFinalRecognition(mDtmfConfig, null, mNoInputTimeout);
         }
         return mBuilder.build();
+    }
+
+    /**
+     * Work in progress. Perhaps provide a fluent builder for recording configuration too.
+     * 
+     * @return
+     */
+    public FluentInteractionBuilder record() {
+        RecordingConfiguration recordingConfiguration = new RecordingConfiguration();
+        recordingConfiguration.setBeep(true);
+        recordingConfiguration.setDtmfTerm(true);
+        recordingConfiguration.setType("audio/x-wav");
+        recordingConfiguration.setClientSideAssignationDestination(RECORDING_LOCATION);
+        GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits?length=1");
+        DtmfRecognitionConfiguration config = new DtmfRecognitionConfiguration(grammarReference);
+        recordingConfiguration.setDtmfTermRecognitionConfiguration(config);
+        recordingConfiguration.setPostAudioToServer(true);
+        mBuilder.setFinalRecording(recordingConfiguration, TimeValue.seconds(10));
+        return this;
     }
 
     private void addPrompt(AudioItem... items) {

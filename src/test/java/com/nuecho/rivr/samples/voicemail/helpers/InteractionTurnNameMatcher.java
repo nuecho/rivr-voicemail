@@ -34,6 +34,6 @@ public final class InteractionTurnNameMatcher extends BaseMatcher<InteractionTur
 
     @Override
     public void describeTo(Description arg0) {
-        arg0.appendText(format("name is [%s] ", mName));
+        arg0.appendText(format("name is [%s]", mName));
     }
 }

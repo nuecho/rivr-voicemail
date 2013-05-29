@@ -10,15 +10,14 @@ import com.nuecho.rivr.voicexml.test.*;
 import com.nuecho.rivr.voicexml.turn.output.interaction.*;
 
 /**
+ * Match the last interaction turn made on the channel with a matcher.
+ * 
  * @author Nu Echo Inc.
  */
-public class DialogueChannelLastInteractionNameMatcher extends BaseMatcher<VoiceXmlTestDialogueChannel> {
+public class DialogueChannelLastInteractionMatcher extends BaseMatcher<VoiceXmlTestDialogueChannel> {
     private Matcher<InteractionTurn> mTurnMatcher;
 
-    /**
-     * @param name
-     */
-    public DialogueChannelLastInteractionNameMatcher(Matcher<InteractionTurn> matcher) {
+    public DialogueChannelLastInteractionMatcher(Matcher<InteractionTurn> matcher) {
         mTurnMatcher = matcher;
     }
 

@@ -1,6 +1,6 @@
- /*
-  * Copyright (c) 2002-2013 Nu Echo Inc.  All rights reserved. 
-  */
+/*
+ * Copyright (c) 2002-2013 Nu Echo Inc. All rights reserved.
+ */
 
 package com.nuecho.rivr.samples.voicemail.helpers;
 
@@ -13,13 +13,33 @@ import com.nuecho.rivr.voicexml.turn.output.interaction.*;
  * @author Nu Echo Inc.
  */
 public final class DialogueMatchers {
-    private DialogueMatchers()  {}
-    
-    public static Matcher<InteractionTurn> nameIs(String name){
+    private DialogueMatchers() {}
+
+    /**
+     * Match the interaction with the supplied name.
+     * 
+     * @param name The name of the interaction.
+     */
+    public static Matcher<InteractionTurn> nameIs(String name) {
         return new InteractionTurnNameMatcher(name);
     }
     
-    public static Matcher<VoiceXmlTestDialogueChannel> lastInteractionNameIs(String name){
-        return new DialogueChannelLastInteractionNameMatcher(nameIs(name));
+    /**
+     * Match the last interaction turn made on the channel with the supplied
+     * name.
+     * 
+     * @param name The expected name of the last interaction.
+     */
+    public static Matcher<VoiceXmlTestDialogueChannel> lastInteractionNameIs(String name) {
+        return new DialogueChannelLastInteractionMatcher(nameIs(name));
+    }
+
+    /**
+     * Match the last interaction turn made on the channel with a matcher.
+     * 
+     * @param matcher The matcher to apply to the last interaction.
+     */
+    public static Matcher<VoiceXmlTestDialogueChannel> lastInteraction(Matcher<InteractionTurn> matcher) {
+        return new DialogueChannelLastInteractionMatcher(matcher);
     }
 }
