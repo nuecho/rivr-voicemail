@@ -104,7 +104,16 @@ public final class FluentInteractionBuilder {
     }
 
     /**
-     * Work in progress. Perhaps provide a fluent builder for recording configuration too.
+     * Utility method to wrap the otherwise built {@link InteractionTurn} via
+     * {@link #build()} in an {@link Interactions}.
+     */
+    public Interactions toInteractions() {
+        return Interactions.wrap(build());
+    }
+
+    /**
+     * Work in progress. Perhaps provide a fluent builder for recording
+     * configuration too.
      * 
      * @return
      */

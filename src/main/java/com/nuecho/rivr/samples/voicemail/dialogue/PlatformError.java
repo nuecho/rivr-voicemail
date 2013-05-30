@@ -7,7 +7,7 @@ package com.nuecho.rivr.samples.voicemail.dialogue;
 /**
  * @author Nu Echo Inc.
  */
-public class PlatformError extends Exception {
+public class PlatformError extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

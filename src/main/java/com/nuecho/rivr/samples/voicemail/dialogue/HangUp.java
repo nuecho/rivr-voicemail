@@ -7,7 +7,7 @@ package com.nuecho.rivr.samples.voicemail.dialogue;
 /**
  * @author Nu Echo Inc.
  */
-public class HangUp extends Exception {
+public class HangUp extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
