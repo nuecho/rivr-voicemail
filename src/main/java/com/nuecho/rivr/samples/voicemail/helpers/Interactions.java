@@ -18,10 +18,10 @@ import com.nuecho.rivr.voicexml.turn.output.interaction.*;
  * @author Nu Echo Inc.
  */
 public final class Interactions {
-    private final InteractionTurn mTurn;
+    private final VoiceXmlOutputTurn mTurn;
     private final Map<String, EventHandler> mHandlers;
 
-    private Interactions(InteractionTurn turn) {
+    private Interactions(VoiceXmlOutputTurn turn) {
         mTurn = turn;
         mHandlers = new TreeMap<String, EventHandler>(new Comparator<String>() {
             @Override
@@ -37,7 +37,7 @@ public final class Interactions {
         });
     }
 
-    public static Interactions wrap(InteractionTurn turn) {
+    public static Interactions wrap(VoiceXmlOutputTurn turn) {
         return new Interactions(turn);
     }
 
@@ -145,10 +145,10 @@ public final class Interactions {
      * @author Nu Echo Inc.
      */
     private static final class RepromptEventHandler implements EventHandler {
-        private InteractionTurn mTurn;
+        private VoiceXmlOutputTurn mTurn;
 
         @Override
-        public EventHandler forTurn(InteractionTurn turn, VoiceXmlInputTurn initialAnswer) {
+        public EventHandler forTurn(VoiceXmlOutputTurn turn, VoiceXmlInputTurn initialAnswer) {
             mTurn = turn;
             return this;
         }
@@ -169,7 +169,7 @@ public final class Interactions {
         }
 
         @Override
-        public EventHandler forTurn(InteractionTurn turn, VoiceXmlInputTurn initialAnswer) {
+        public EventHandler forTurn(VoiceXmlOutputTurn turn, VoiceXmlInputTurn initialAnswer) {
             return this;
         }
 
@@ -201,7 +201,7 @@ public final class Interactions {
          * @param initialAnswer
          * @return
          */
-        EventHandler forTurn(InteractionTurn turn, VoiceXmlInputTurn initialAnswer);
+        EventHandler forTurn(VoiceXmlOutputTurn turn, VoiceXmlInputTurn initialAnswer);
 
         /**
          * Handle the event. The channel and timeout are passed as a convenience

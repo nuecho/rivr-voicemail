@@ -32,9 +32,6 @@ import com.nuecho.rivr.voicexml.util.json.*;
  * @author Nu Echo Inc.
  */
 public final class VoicemailDialogue implements VoiceXmlDialogue {
-    /**
-     * 
-     */
     private static final TimeValue DEFAULT_TIMEOUT = TimeValue.seconds(5);
 
     private final Logger mLog = LoggerFactory.getLogger(getClass());
@@ -93,16 +90,18 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         if (login() == null) return STATUS_INVALID_USER;
 
         // C03
-        // The real voicemail (ie with the phone) has these audios, but not in the NuBot callflow.
-        //            Interactions mainMenu = newInteraction("main-menu").dtmfBargeIn(1)
-        //                                                               .audio(audioPath("vm-youhave"))
-        //                                                               .synthesis("0")
-        //                                                               .audio(audioPath("vm-received"))
-        //                                                               .audio(audioPath("vm-opts"))
-        //                                                               .noInputTimeout(DEFAULT_TIMEOUT)
-        //                                                               .toInteractions();
-        //            alwaysReprompt(mainMenu);
-        Interactions mainMenu = alwaysReprompt(audioWithDtmf("main-menu", "vm-opts", 1));
+        Interactions mainMenu = newInteraction("main-menu").dtmfBargeIn(1)
+                                                           .audio(audioPath("vm-youhave"))
+                                                           .synthesis("1")
+                                                           .audio(audioPath("vm-Old"))
+                                                           .audio(audioPath("vm-message"))
+                                                           .audio(audioPath("vm-onefor"))
+                                                           .audio(audioPath("vm-Old"))
+                                                           .audio(audioPath("vm-messages"))
+                                                           .audio(audioPath("vm-opts"))
+                                                           .noInputTimeout(DEFAULT_TIMEOUT)
+                                                           .toInteractions();
+        alwaysReprompt(mainMenu);
         String menu;
         do {
             menu = processDtmfTurn(mainMenu);
@@ -114,6 +113,9 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
                 advancedOptions();
             }
         } while (!"#".equals(menu));
+
+        // C50
+        processTurn(audio("good-bye", "vm-goodbye"));
 
         return STATUS_SUCCESS;
     }
@@ -150,14 +152,75 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return newInteraction(interactionName).audio(audioPath(audioName)).build();
     }
 
-    private void messageMenu() {
-        // TODO Auto-generated method stub
-
+    private void messageMenu() throws Timeout, InterruptedException {
+        // C04 first message received "date" from "phone number" recording
+        InteractionTurn playMessage = newInteraction("play-message").audio(audioPath("vm-first"))
+                                                                    .audio(audioPath("vm-message"))
+                                                                    .audio(audioPath("vm-received"))
+                                                                    .build();
+        // C05
+        Interactions callMenu = audioWithDtmf("call-menu", "vm-advopts", 1);
+        // C17 which folder loop press dtmf for foldername messages
+        Interactions whichFolder = audioWithDtmf("ask-folder-to-save", "vm-savefolder", 1);
+        // C18 message 1 savedto old messages
+        InteractionTurn messageSaved = audio("message-saved", "vm-savedto");
+        String menu;
+        processTurn(playMessage);
+        do {
+            menu = processDtmfTurn(callMenu);
+            if ("9".equals(menu)) {
+                String folderNum = processDtmfTurn(whichFolder);
+                if ("1".equals(folderNum)) {// TODO do something with the folder
+                    processTurn(messageSaved);
+                }
+                // TODO usually, 4 means previous, 5 replay and 6 next. just replay same for now.
+            } else if ("4".equals(menu) || "5".equals(menu) || "6".equals(menu)) {
+                processTurn(playMessage);
+            }
+        } while (!"*".equals(menu)); // TODO '#' should exit voicemail.
     }
 
-    private void advancedOptions() {
-        // TODO Auto-generated method stub
+    private void advancedOptions() throws Timeout, InterruptedException {
+        // C11
+        Interactions advancedMenu = audioWithDtmf("advanced-options", "vm-leavemsg", 1);
+        // C12
+        Interactions extension = audioWithDtmf("ask-extension", "vm-extension", 4);
+        // C14
+        Interactions message = newInteraction("ask-message").audio(audioPath("vm-intro")).record().toInteractions();
+        defaultHandlers(message);
+        // C15
+        Interactions toCall = newInteraction("ask-number-to-call").dtmfBargeIn("#")
+                                                                  .audio(audioPath("vm-enter-num-to-call"))
+                                                                  .toInteractions();
+        defaultHandlers(toCall);
+        // C16
+        InteractionTurn dialOut = audio("dial-out", "vm-dialout");
 
+        String subMenu = processDtmfTurn(advancedMenu);
+        if ("4".equals(subMenu)) {
+            String numberToCall = processDtmfTurn(toCall);
+            if ("1234".equals(numberToCall)) {
+                processTurn(dialOut);
+                // TODO Transfer
+                //            defaultHandlers(wrap(new BlindTransferTurn("dial-out", numberToCall))).doTurn(mChannel, null);
+            }
+        } else if ("5".equals(subMenu)) {
+            String extensionToCall;
+            do {
+                extensionToCall = processDtmfTurn(extension);
+            } while (!validateExtension(extensionToCall));
+
+            message.doTurn(mChannel, null); // what to do with the recording?
+        }
+    }
+
+    private boolean validateExtension(String extensionToCall) throws Timeout, InterruptedException {
+        if (!"1234".equals(extensionToCall)) {
+            // C13
+            processTurn(audio("invalid-extension", "pbx-invalid"));
+            return false;
+        }
+        return true;
     }
 
     private User login() throws Timeout, InterruptedException, HangUp, PlatformError {

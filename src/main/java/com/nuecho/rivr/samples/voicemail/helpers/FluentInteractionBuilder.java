@@ -42,6 +42,19 @@ public final class FluentInteractionBuilder {
     public FluentInteractionBuilder dtmfBargeIn(int dtmfLength) {
         GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits?length=" + dtmfLength);
         mDtmfConfig = new DtmfRecognitionConfiguration(grammarReference);
+        mDtmfConfig.setTermChar("A");
+        return this;
+    }
+    
+    /**
+     * Enable barge-in for subsequent prompts.
+     * 
+     * @param termChar The dtmf that ends the recognized input.
+     */
+    public FluentInteractionBuilder dtmfBargeIn(String termChar) {
+        GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits");
+        mDtmfConfig = new DtmfRecognitionConfiguration(grammarReference);
+        mDtmfConfig.setTermChar(termChar);
         return this;
     }
 
