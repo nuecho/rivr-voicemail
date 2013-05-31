@@ -6,6 +6,7 @@ package com.nuecho.rivr.samples.voicemail.helpers;
 
 import org.hamcrest.*;
 
+import com.nuecho.rivr.core.channel.*;
 import com.nuecho.rivr.voicexml.test.*;
 import com.nuecho.rivr.voicexml.turn.output.interaction.*;
 
@@ -41,5 +42,13 @@ public final class DialogueMatchers {
      */
     public static Matcher<VoiceXmlTestDialogueChannel> lastInteraction(Matcher<InteractionTurn> matcher) {
         return new DialogueChannelLastInteractionMatcher(matcher);
+    }
+
+    /**
+     * Match a dialogue that its execution is complete, ie the dialogue
+     * associated with it returned a {@link LastTurn}.
+     */
+    public static Matcher<VoiceXmlTestDialogueChannel> isDone() {
+        return new DialogueChannelIsdoneMatcher();
     }
 }
