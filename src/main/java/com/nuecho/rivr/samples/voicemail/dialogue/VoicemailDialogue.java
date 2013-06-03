@@ -8,6 +8,8 @@ import static com.nuecho.rivr.samples.voicemail.helpers.FluentInteractionBuilder
 import static com.nuecho.rivr.samples.voicemail.helpers.Interactions.*;
 import static java.lang.String.*;
 
+import java.util.regex.*;
+
 import javax.json.*;
 
 import org.slf4j.*;
@@ -44,6 +46,8 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private static final String CAUSE_PROPERTY = "cause";
 
+    private static final Pattern DNIS = Pattern.compile(".*:([0-9]*)@.*:.*");
+
     private static final EventHandler THROW_HANGUP;
     private static final EventHandler THROW_PLATFORM_ERROR;
 
@@ -58,6 +62,8 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private final DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> mChannel;
     private String mContextPath;
+
+    private boolean mNuBotMode;
 
     public VoicemailDialogue(DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> channel) {
         mChannel = channel;
@@ -77,16 +83,18 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
             mLog.error("Error during dialogue", exception);
             status = STATUS_ERROR;
             JsonUtils.add(resultObjectBuilder, CAUSE_PROPERTY, ResultUtils.toJson(exception));
-            return new VoiceXmlReturnTurn(STATUS_ERROR, "com.nuecho.rivr", null);
+            return new VoiceXmlExitTurn(STATUS_ERROR, "com.nuecho.rivr");
         }
 
         JsonUtils.add(resultObjectBuilder, STATUS_PROPERTY, status);
         VariableDeclarationList variables = VariableDeclarationList.create(resultObjectBuilder.build());
 
-        return new VoiceXmlReturnTurn("result", variables);
+        return new VoiceXmlExitTurn("result", variables);
     }
 
     private String runDialogue() throws Timeout, InterruptedException {
+        detectNuBotInstrumentation();
+
         if (login() == null) return STATUS_INVALID_USER;
 
         // C03
@@ -118,6 +126,27 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         processTurn(audio("good-bye", "vm-goodbye"));
 
         return STATUS_SUCCESS;
+    }
+
+    private void detectNuBotInstrumentation() throws Timeout, InterruptedException {
+        ScriptExecutionTurn clidAndDnisTurn = new ScriptExecutionTurn("clidAndDnis");
+        VariableDeclarationList dnisVariables = new VariableDeclarationList();
+        dnisVariables.addVariable(new VariableDeclaration("dnis", "session.connection.local.uri"));
+        clidAndDnisTurn.setVariables(dnisVariables);
+
+        VoiceXmlInputTurn inputTurn = processTurn(clidAndDnisTurn);
+        JsonObject result = (JsonObject) inputTurn.getJsonValue();
+
+        if (result != null) {
+            String dnis = result.getString("dnis");
+            Matcher matcher = DNIS.matcher(dnis);
+            if (!matcher.matches()) throw new IllegalArgumentException(format("Received invalid dnis [%s]", dnis));
+            String extension = matcher.group(1);
+            mNuBotMode = extension.startsWith("495");
+            if (mNuBotMode) {
+                mLog.info("Running dialogue in NuBot mode (instrumented prompts)");
+            }
+        }
     }
 
     private void mailboxConfigure() throws Timeout, InterruptedException, HangUp, PlatformError {
@@ -266,7 +295,8 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
     }
 
     private String audioPath(String audio) {
-        return format("%s/instrumented/%s.ulaw", mContextPath, audio);
+        String promptType = mNuBotMode ? "instrumented" : "original";
+        return format("%s/%s/%s.ulaw", mContextPath, promptType, audio);
     }
 
     private static Interactions defaultHandlers(Interactions interactions) {
@@ -286,7 +316,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return rawDtmfs.replace(" ", "");
     }
 
-    private VoiceXmlInputTurn processTurn(InteractionTurn outputTurn) throws Timeout, InterruptedException {
+    private VoiceXmlInputTurn processTurn(VoiceXmlOutputTurn outputTurn) throws Timeout, InterruptedException {
         return defaultHandlers(wrap(outputTurn)).doTurn(mChannel, null);
     }
 
