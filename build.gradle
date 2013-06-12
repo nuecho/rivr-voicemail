@@ -1,10 +1,19 @@
 apply plugin: 'jetty'
 apply plugin: 'eclipse'
 
+version = '0.1.3'
 
 repositories {
     maven { url 'http://knox.s.nuecho.com/artifactory/libs-release' }
     ivy { url 'http://knox.s.nuecho.com/artifactory/libs-release' }
+}
+
+war {
+  manifest.mainAttributes(
+    'Implementation-Title': 'rivr-voicemail',
+    'Implementation-Version': version,
+    'Implementation-Vendor': 'Nu Echo Inc.' 
+  )
 }
 
 sourceCompatibility = '1.6'
