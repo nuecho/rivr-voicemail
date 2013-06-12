@@ -2,6 +2,7 @@
 
   <!-- this date pattern conform to ISO date format -->
   <property name="DEFAULT_PATTERN" value="[%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSZ}] [%p] [%c] %m%n" />
+  <!-- not used for now. could be used via MDC -->
   <property name="DIALOG_PATTERN" value="[%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSZ}] [%p] [%X{dialogId}] %m%n" />
 
   <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
@@ -10,12 +11,18 @@
     </encoder>
   </appender>
 
+  <appender name="logglyAppender" class="ch.qos.logback.ext.loggly.LogglyAppender">
+    <inputKey>c81f5542-f51d-42e3-9130-71f2cb205be0</inputKey>
+    <pattern>${DEFAULT_PATTERN}</pattern>
+  </appender>
+
   <logger name="com.nuecho.rivr">
     <level value="TRACE" />
   </logger>
 
   <root level="TRACE">
     <appender-ref ref="consoleAppender" />
+    <appender-ref ref="logglyAppender" />
   </root>
 
 </configuration>
