@@ -4,8 +4,7 @@
 
 package com.nuecho.rivr.samples.voicemail.dialogue;
 
-import static com.nuecho.rivr.samples.voicemail.helpers.FluentInteractionBuilder.*;
-import static com.nuecho.rivr.samples.voicemail.helpers.Interactions.*;
+import static com.nuecho.rivr.voicexml.turn.output.interaction.InteractionBuilder.*;
 import static java.lang.String.*;
 
 import java.util.regex.*;
@@ -16,8 +15,6 @@ import org.slf4j.*;
 
 import com.nuecho.rivr.core.channel.*;
 import com.nuecho.rivr.core.util.*;
-import com.nuecho.rivr.samples.voicemail.helpers.*;
-import com.nuecho.rivr.samples.voicemail.helpers.Interactions.EventHandler;
 import com.nuecho.rivr.samples.voicemail.model.*;
 import com.nuecho.rivr.voicexml.dialogue.*;
 import com.nuecho.rivr.voicexml.rendering.voicexml.*;
@@ -26,6 +23,8 @@ import com.nuecho.rivr.voicexml.turn.first.*;
 import com.nuecho.rivr.voicexml.turn.input.*;
 import com.nuecho.rivr.voicexml.turn.last.*;
 import com.nuecho.rivr.voicexml.turn.output.*;
+import com.nuecho.rivr.voicexml.turn.output.audio.*;
+import com.nuecho.rivr.voicexml.turn.output.grammar.*;
 import com.nuecho.rivr.voicexml.turn.output.interaction.*;
 import com.nuecho.rivr.voicexml.util.*;
 import com.nuecho.rivr.voicexml.util.json.*;
@@ -48,17 +47,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private static final Pattern DNIS = Pattern.compile(".*:([0-9]*)@.*:.*");
 
-    private static final EventHandler THROW_HANGUP;
-    private static final EventHandler THROW_PLATFORM_ERROR;
-
-    static {
-        try {
-            THROW_HANGUP = throwException(HangUp.class);
-            THROW_PLATFORM_ERROR = throwException(PlatformError.class);
-        } catch (NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
+    private static final String RECORDING_LOCATION = "application.recording";
 
     private final DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> mChannel;
     private String mContextPath;
@@ -98,18 +87,20 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         if (login() == null) return STATUS_INVALID_USER;
 
         // C03
-        Interactions mainMenu = newInteraction("main-menu").dtmfBargeIn(1)
-                                                           .audio(audioPath("vm-youhave"))
-                                                           .synthesis("1")
-                                                           .audio(audioPath("vm-Old"))
-                                                           .audio(audioPath("vm-message"))
-                                                           .audio(audioPath("vm-onefor"))
-                                                           .audio(audioPath("vm-Old"))
-                                                           .audio(audioPath("vm-messages"))
-                                                           .audio(audioPath("vm-opts"))
-                                                           .noInputTimeout(DEFAULT_TIMEOUT)
-                                                           .toInteractions();
-        alwaysReprompt(mainMenu);
+        DtmfRecognitionConfiguration dtmfConfig = dtmfBargIn(1);
+        InteractionTurn mainMenu = newBuilder("main-menu").addPrompt(dtmfConfig,
+                                                                     null,
+                                                                     audio("vm-youhave"),
+                                                                     synthesis("1"),
+                                                                     audio("vm-Old"),
+                                                                     audio("vm-message"),
+                                                                     audio("vm-onefor"),
+                                                                     audio("vm-Old"),
+                                                                     audio("vm-messages"),
+                                                                     audio("vm-opts"))
+                                                          .setFinalRecognition(dtmfConfig, null, DEFAULT_TIMEOUT)
+                                                          .build();
+
         String menu;
         do {
             menu = processDtmfTurn(mainMenu);
@@ -151,17 +142,17 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private void mailboxConfigure() throws Timeout, InterruptedException, HangUp, PlatformError {
         // C07
-        Interactions options = alwaysReprompt(audioWithDtmf("mailbox-options", "vm-options", 1));
+        InteractionTurn options = audioWithDtmf("mailbox-options", "vm-options", 1);
 
         // C08
-        InteractionTurn record = newInteraction("record-name").audio(audioPath("vm-rec-name")).record().build();
+        InteractionTurn record = record("record-name", "vm-rec-name");
 
         // C09
         // FIXME onNoMatch: sorry + reprompt. Missing sorry prompt, so always reprompt instead.
-        Interactions review = alwaysReprompt(audioWithDtmf("confirm-name", "vm-review", 1));
+        InteractionTurn review = audioWithDtmf("confirm-name", "vm-review", 1);
 
         // C10
-        InteractionTurn saved = audio("message-saved", "vm-msgsaved");
+        MessageTurn saved = audio("message-saved", "vm-msgsaved");
 
         String selectedOption;
         do {
@@ -177,22 +168,21 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         } while (!"*".equals(selectedOption));
     }
 
-    private InteractionTurn audio(String interactionName, String audioName) {
-        return newInteraction(interactionName).audio(audioPath(audioName)).build();
+    private MessageTurn audio(String interactionName, String audioName) {
+        return new MessageTurn(interactionName, audio(audioName));
     }
 
     private void messageMenu() throws Timeout, InterruptedException {
         // C04 first message received "date" from "phone number" recording
-        InteractionTurn playMessage = newInteraction("play-message").audio(audioPath("vm-first"))
-                                                                    .audio(audioPath("vm-message"))
-                                                                    .audio(audioPath("vm-received"))
-                                                                    .build();
+        InteractionTurn playMessage = newBuilder("play-message").addPrompt(audio("vm-first"),
+                                                                           audio("vm-message"),
+                                                                           audio("vm-received")).build();
         // C05
-        Interactions callMenu = audioWithDtmf("call-menu", "vm-advopts", 1);
+        InteractionTurn callMenu = audioWithDtmf("call-menu", "vm-advopts", 1);
         // C17 which folder loop press dtmf for foldername messages
-        Interactions whichFolder = audioWithDtmf("ask-folder-to-save", "vm-savefolder", 1);
+        InteractionTurn whichFolder = audioWithDtmf("ask-folder-to-save", "vm-savefolder", 1);
         // C18 message 1 savedto old messages
-        InteractionTurn messageSaved = audio("message-saved", "vm-savedto");
+        MessageTurn messageSaved = audio("message-saved", "vm-savedto");
         String menu;
         processTurn(playMessage);
         do {
@@ -211,19 +201,22 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private void advancedOptions() throws Timeout, InterruptedException {
         // C11
-        Interactions advancedMenu = audioWithDtmf("advanced-options", "vm-leavemsg", 1);
+        InteractionTurn advancedMenu = audioWithDtmf("advanced-options", "vm-leavemsg", 1);
         // C12
-        Interactions extension = audioWithDtmf("ask-extension", "vm-extension", 4);
+        InteractionTurn extension = audioWithDtmf("ask-extension", "vm-extension", 4);
         // C14
-        Interactions message = newInteraction("ask-message").audio(audioPath("vm-intro")).record().toInteractions();
-        defaultHandlers(message);
+
+        InteractionTurn message = record("ask-message", "vm-intro");
         // C15
-        Interactions toCall = newInteraction("ask-number-to-call").dtmfBargeIn("#")
-                                                                  .audio(audioPath("vm-enter-num-to-call"))
-                                                                  .toInteractions();
-        defaultHandlers(toCall);
+        DtmfRecognitionConfiguration dtmfConfig = dtmfBargeIn("#");
+        InteractionTurn toCall = newBuilder("ask-number-to-call").addPrompt(dtmfConfig,
+                                                                            null,
+                                                                            audio("vm-enter-num-to-call"))
+                                                                 .setFinalRecognition(dtmfConfig, null, DEFAULT_TIMEOUT)
+                                                                 .build();
+
         // C16
-        InteractionTurn dialOut = audio("dial-out", "vm-dialout");
+        MessageTurn dialOut = audio("dial-out", "vm-dialout");
 
         String subMenu = processDtmfTurn(advancedMenu);
         if ("4".equals(subMenu)) {
@@ -239,7 +232,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
                 extensionToCall = processDtmfTurn(extension);
             } while (!validateExtension(extensionToCall));
 
-            message.doTurn(mChannel, null); // what to do with the recording?
+            mChannel.doTurn(message, null); // what to do with the recording?
         }
     }
 
@@ -255,11 +248,11 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
     private User login() throws Timeout, InterruptedException, HangUp, PlatformError {
         TimeValue timeout = TimeValue.seconds(10);
         // C01
-        Interactions askLogin = audioWithDtmf("ask-login", "vm-login", 4, timeout);
+        InteractionTurn askLogin = audioWithDtmf("ask-login", "vm-login", 4, timeout);
         // C02
-        Interactions askPassword = audioWithDtmf("ask-password", "vm-password", 4, timeout);
+        InteractionTurn askPassword = audioWithDtmf("ask-password", "vm-password", 4, timeout);
         // C06
-        Interactions incorrect = audioWithDtmf("incorrect-mailbox", "vm-incorrect-mailbox", 4, timeout);
+        InteractionTurn incorrect = audioWithDtmf("incorrect-mailbox", "vm-incorrect-mailbox", 4, timeout);
 
         String username;
         String password;
@@ -283,15 +276,37 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return username.equals("4069") && password.equals("6522");
     }
 
-    private Interactions audioWithDtmf(String interactionName, String audio, int dtmfLength) {
+    private AudioItem synthesis(String text) {
+        return new SynthesisText(text);
+    }
+
+    private AudioItem audio(String audioName) {
+        return new Recording(audioPath(audioName));
+    }
+
+    private DtmfRecognitionConfiguration dtmfBargIn(int dtmfLength) {
+        GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits?length=" + dtmfLength);
+        DtmfRecognitionConfiguration dtmfConfig = new DtmfRecognitionConfiguration(grammarReference);
+        dtmfConfig.setTermChar("A");
+        return dtmfConfig;
+    }
+
+    private DtmfRecognitionConfiguration dtmfBargeIn(String termChar) {
+        GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits");
+        DtmfRecognitionConfiguration dtmfConfig = new DtmfRecognitionConfiguration(grammarReference);
+        dtmfConfig.setTermChar(termChar);
+        return dtmfConfig;
+    }
+
+    private InteractionTurn audioWithDtmf(String interactionName, String audio, int dtmfLength) {
         return audioWithDtmf(interactionName, audio, dtmfLength, DEFAULT_TIMEOUT);
     }
 
-    private Interactions audioWithDtmf(String interactionName, String audio, int dtmfLength, TimeValue noInputTimeout) {
-        return newInteraction(interactionName).dtmfBargeIn(dtmfLength)
-                                              .audio(audioPath(audio))
-                                              .noInputTimeout(noInputTimeout)
-                                              .toInteractions();
+    private InteractionTurn audioWithDtmf(String interactionName, String audio, int dtmfLength, TimeValue noInputTimeout) {
+        DtmfRecognitionConfiguration dtmfconfig = dtmfBargIn(dtmfLength);
+        return newBuilder(interactionName).addPrompt(dtmfconfig, null, audio(audio))
+                                          .setFinalRecognition(dtmfconfig, null, noInputTimeout)
+                                          .build();
     }
 
     private String audioPath(String audio) {
@@ -299,17 +314,26 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return format("%s/%s/%s.ulaw", mContextPath, promptType, audio);
     }
 
-    private static Interactions defaultHandlers(Interactions interactions) {
-        return interactions.onHangup(THROW_HANGUP).handlerFor(VoiceXmlEvent.ERROR, THROW_PLATFORM_ERROR);
+    private InteractionTurn record(String interactionName, String audio) {
+        RecordingConfiguration recordingConfiguration = new RecordingConfiguration();
+        recordingConfiguration.setBeep(true);
+        recordingConfiguration.setDtmfTerm(true);
+        recordingConfiguration.setType("audio/x-wav");
+        recordingConfiguration.setClientSideAssignationDestination(RECORDING_LOCATION);
+        GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits?length=1");
+        DtmfRecognitionConfiguration config = new DtmfRecognitionConfiguration(grammarReference);
+        recordingConfiguration.setDtmfTermRecognitionConfiguration(config);
+        recordingConfiguration.setPostAudioToServer(true);
+
+        return newBuilder(interactionName).addPrompt(audio(audio))
+                                          .setFinalRecording(recordingConfiguration, TimeValue.seconds(10))
+                                          .build();
     }
 
-    private static Interactions alwaysReprompt(Interactions interactions) {
-        return interactions.onNoInput(reprompt()).onNoMatch(reprompt());
-    }
-
-    private String processDtmfTurn(Interactions interaction) throws Timeout, InterruptedException {
+    private String processDtmfTurn(InteractionTurn interaction) throws Timeout, InterruptedException {
         // Is there a better way?
-        RecognitionInfo result = defaultHandlers(interaction).doTurn(mChannel, null).getRecognitionInfo();
+        VoiceXmlInputTurn resultTurn = processTurn(interaction);
+        RecognitionInfo result = resultTurn.getRecognitionInfo();
         if (result == null) return "";
         String rawDtmfs = result.getRecognitionResult().getJsonObject(0).getJsonString("utterance").getString();
         mLog.trace("Received {}", rawDtmfs);
@@ -317,7 +341,14 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
     }
 
     private VoiceXmlInputTurn processTurn(VoiceXmlOutputTurn outputTurn) throws Timeout, InterruptedException {
-        return defaultHandlers(wrap(outputTurn)).doTurn(mChannel, null);
+        VoiceXmlInputTurn inputTurn = mChannel.doTurn(outputTurn, null);
+        while (VoiceXmlEvent.hasEvent(VoiceXmlEvent.NO_INPUT, inputTurn.getEvents())
+               || VoiceXmlEvent.hasEvent(VoiceXmlEvent.NO_MATCH, inputTurn.getEvents())) {
+            inputTurn = mChannel.doTurn(outputTurn, null);
+        }
+        if (VoiceXmlEvent.hasEvent(VoiceXmlEvent.CONNECTION_DISCONNECT_HANGUP, inputTurn.getEvents())) { throw new HangUp(); }
+        if (VoiceXmlEvent.hasEvent(VoiceXmlEvent.ERROR, inputTurn.getEvents())) { throw new PlatformError(); }
+        return inputTurn;
     }
 
 }
