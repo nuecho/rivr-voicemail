@@ -21,9 +21,10 @@ public final class FluentInteractionBuilder {
     private final InteractionBuilder mBuilder;
     private DtmfRecognitionConfiguration mDtmfConfig;
     private TimeValue mNoInputTimeout = TimeValue.seconds(10);
+    private List<AudioItem> mPromptItems = new ArrayList<AudioItem>();
 
     private FluentInteractionBuilder(String name) {
-        mBuilder = new InteractionBuilder(name);
+        mBuilder = InteractionBuilder.newBuilder(name);
     }
 
     public static FluentInteractionBuilder newInteraction() {
@@ -76,7 +77,7 @@ public final class FluentInteractionBuilder {
      * @return this instance, for easy chaining.
      */
     public FluentInteractionBuilder synthesis(String text) {
-        addPrompt(new SynthesisText(text));
+        mPromptItems.add(new SynthesisText(text));
         return this;
     }
 
@@ -89,7 +90,7 @@ public final class FluentInteractionBuilder {
      * @param path The audio path on the server
      */
     public FluentInteractionBuilder audio(String path) {
-        addPrompt(new Recording(path));
+        mPromptItems.add(new Recording(path));
         return this;
     }
 
@@ -97,7 +98,7 @@ public final class FluentInteractionBuilder {
      * Replay a previously recored message.
      */
     public FluentInteractionBuilder replayRecording() {
-        mBuilder.addPrompt(new ClientSideRecording(RECORDING_LOCATION));
+        mPromptItems.add(new ClientSideRecording(RECORDING_LOCATION));
         return this;
     }
 
@@ -111,7 +112,10 @@ public final class FluentInteractionBuilder {
      */
     public InteractionTurn build() {
         if (mDtmfConfig != null) {
+            mBuilder.addPrompt(mDtmfConfig, null, mPromptItems);
             mBuilder.setFinalRecognition(mDtmfConfig, null, mNoInputTimeout);
+        } else {
+            mBuilder.addPrompt(mPromptItems);
         }
         return mBuilder.build();
     }
@@ -142,13 +146,5 @@ public final class FluentInteractionBuilder {
         recordingConfiguration.setPostAudioToServer(true);
         mBuilder.setFinalRecording(recordingConfiguration, TimeValue.seconds(10));
         return this;
-    }
-
-    private void addPrompt(AudioItem... items) {
-        if (mDtmfConfig != null) {
-            mBuilder.addPrompt(Arrays.asList(items), mDtmfConfig, null);
-        } else {
-            mBuilder.addPrompt(items);
-        }
     }
 }

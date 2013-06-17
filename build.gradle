@@ -10,7 +10,7 @@ repositories {
 sourceCompatibility = '1.6'
 
 dependencies {
-    compile 'com.nuecho:rivr-voicexml:0.2.0'
+    compile 'com.nuecho:rivr-voicexml:0.2.2'
     providedCompile 'javax.servlet:servlet-api:2.5'
     testCompile 'junit:junit:4.10'
     runtime 'ch.qos.logback:logback-classic:1.0.13'
