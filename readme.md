@@ -20,3 +20,16 @@ Gradle project handling within Eclipse requires the [Gradle plugin]()
 ### Note
 
 You may also directly import the Gradle project from **File** > **Import** > **Gradle** > **Gradle Project**
+
+## Demo 
+
+An instance of this application is currently deployed over Amazon Beanstalk (http://rivr-voicemail.elasticbeanstalk.com/dialogue/) 
+and reacheable from the Voxeo's Hosted Platform
+
+    skype: 990009369991420387
+    pstn: +1-438-800-1164  
+
+With the following voicemail login details:
+
+    Mailbox: 4069 
+    Password: 6522
