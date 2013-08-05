@@ -88,18 +88,16 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
         // C03
         DtmfRecognitionConfiguration dtmfConfig = dtmfBargIn(1);
-        InteractionTurn mainMenu = newBuilder("main-menu").addPrompt(dtmfConfig,
-                                                                     null,
-                                                                     audio("vm-youhave"),
-                                                                     synthesis("1"),
-                                                                     audio("vm-Old"),
-                                                                     audio("vm-message"),
-                                                                     audio("vm-onefor"),
-                                                                     audio("vm-Old"),
-                                                                     audio("vm-messages"),
-                                                                     audio("vm-opts"))
-                                                          .setFinalRecognition(dtmfConfig, null, DEFAULT_TIMEOUT)
-                                                          .build();
+        InteractionTurn mainMenu = newInteractionBuilder("main-menu").addPrompt(dtmfConfig,
+                                                                                audio("vm-youhave"),
+                                                                                synthesis("1"),
+                                                                                audio("vm-Old"),
+                                                                                audio("vm-message"),
+                                                                                audio("vm-onefor"),
+                                                                                audio("vm-Old"),
+                                                                                audio("vm-messages"),
+                                                                                audio("vm-opts"))
+                                                                     .build(dtmfConfig, DEFAULT_TIMEOUT);
 
         String menu;
         do {
@@ -174,9 +172,9 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private void messageMenu() throws Timeout, InterruptedException {
         // C04 first message received "date" from "phone number" recording
-        InteractionTurn playMessage = newBuilder("play-message").addPrompt(audio("vm-first"),
-                                                                           audio("vm-message"),
-                                                                           audio("vm-received")).build();
+        InteractionTurn playMessage = newInteractionBuilder("play-message").addPrompt(audio("vm-first"),
+                                                                                      audio("vm-message"),
+                                                                                      audio("vm-received")).build();
         // C05
         InteractionTurn callMenu = audioWithDtmf("call-menu", "vm-advopts", 1);
         // C17 which folder loop press dtmf for foldername messages
@@ -209,11 +207,9 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         InteractionTurn message = record("ask-message", "vm-intro");
         // C15
         DtmfRecognitionConfiguration dtmfConfig = dtmfBargeIn("#");
-        InteractionTurn toCall = newBuilder("ask-number-to-call").addPrompt(dtmfConfig,
-                                                                            null,
-                                                                            audio("vm-enter-num-to-call"))
-                                                                 .setFinalRecognition(dtmfConfig, null, DEFAULT_TIMEOUT)
-                                                                 .build();
+        InteractionTurn toCall = newInteractionBuilder("ask-number-to-call").addPrompt(dtmfConfig,
+                                                                                       audio("vm-enter-num-to-call"))
+                                                                            .build(dtmfConfig, DEFAULT_TIMEOUT);
 
         // C16
         MessageTurn dialOut = audio("dial-out", "vm-dialout");
@@ -304,9 +300,8 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private InteractionTurn audioWithDtmf(String interactionName, String audio, int dtmfLength, TimeValue noInputTimeout) {
         DtmfRecognitionConfiguration dtmfconfig = dtmfBargIn(dtmfLength);
-        return newBuilder(interactionName).addPrompt(dtmfconfig, null, audio(audio))
-                                          .setFinalRecognition(dtmfconfig, null, noInputTimeout)
-                                          .build();
+        return newInteractionBuilder(interactionName).addPrompt(dtmfconfig, audio(audio)).build(dtmfconfig,
+                                                                                                noInputTimeout);
     }
 
     private String audioPath(String audio) {
@@ -325,9 +320,8 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         recordingConfiguration.setDtmfTermRecognitionConfiguration(config);
         recordingConfiguration.setPostAudioToServer(true);
 
-        return newBuilder(interactionName).addPrompt(audio(audio))
-                                          .setFinalRecording(recordingConfiguration, TimeValue.seconds(10))
-                                          .build();
+        return newInteractionBuilder(interactionName).addPrompt(audio(audio)).build(recordingConfiguration,
+                                                                                    TimeValue.seconds(10));
     }
 
     private String processDtmfTurn(InteractionTurn interaction) throws Timeout, InterruptedException {
