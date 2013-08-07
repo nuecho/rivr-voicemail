@@ -13,11 +13,6 @@
     <servlet-class>com.nuecho.rivr.voicexml.servlet.VoiceXmlDialogueServlet</servlet-class>
 
     <init-param>
-      <param-name>dialogueFactory.class</param-name>
-      <param-value>com.nuecho.rivr.samples.voicemail.dialogue.VoicemailDialogueFactory</param-value>
-    </init-param>
-
-    <init-param>
       <param-name>dialogue.class</param-name>
       <param-value>com.nuecho.rivr.samples.voicemail.dialogue.VoicemailDialogue</param-value>
     </init-param>

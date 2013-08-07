@@ -55,7 +55,7 @@ public class TestDialogueChannel extends ExternalResource {
                                                                       "contextPath",
                                                                       "servletPath");
         mFactory.create(new TestDialogueInitializationInfo(context));
-        VoicemailDialogue dialogue = new VoicemailDialogue(mDialogueChannel);
+        VoicemailDialogue dialogue = new VoicemailDialogue();
         mDialogueChannel.startDialogue(dialogue, new VoiceXmlFirstTurn(), context);
     }
 

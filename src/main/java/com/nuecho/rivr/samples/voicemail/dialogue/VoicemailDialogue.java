@@ -49,18 +49,15 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private static final String RECORDING_LOCATION = "application.recording";
 
-    private final DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> mChannel;
+    private DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> mChannel;
     private String mContextPath;
 
     private boolean mNuBotMode;
 
-    public VoicemailDialogue(DialogueChannel<VoiceXmlInputTurn, VoiceXmlOutputTurn> channel) {
-        mChannel = channel;
-    }
-
     @Override
     public VoiceXmlLastTurn run(VoiceXmlFirstTurn firstTurn, VoiceXmlDialogueContext context) throws Exception {
         mContextPath = context.getContextPath();
+        mChannel = context.getDialogueChannel();
         String status;
         JsonObjectBuilder resultObjectBuilder = JsonUtils.createObjectBuilder();
         try {

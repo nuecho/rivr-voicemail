@@ -8,7 +8,9 @@ import static com.nuecho.rivr.samples.voicemail.helpers.DialogueMatchers.*;
 
 import org.junit.*;
 
+import com.nuecho.rivr.core.dialogue.*;
 import com.nuecho.rivr.core.util.*;
+import com.nuecho.rivr.voicexml.dialogue.*;
 import com.nuecho.rivr.voicexml.turn.input.*;
 import com.nuecho.rivr.voicexml.util.json.*;
 
@@ -18,8 +20,12 @@ import com.nuecho.rivr.voicexml.util.json.*;
 public class DialogueTests {
 
     @Rule
-    private TestDialogueChannel mChannel = new TestDialogueChannel(new VoicemailDialogueFactory());
+    private TestDialogueChannel mChannel;
 
+    public DialogueTests() throws DialogueFactoryException {
+        mChannel = new TestDialogueChannel(new SimpleVoiceXmlDialogueFactory(VoicemailDialogue.class));
+    }
+    
     @Test
     public void loginSuccess() {
         assertLastInteractionName("ask-login");
