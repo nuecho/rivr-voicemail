@@ -69,7 +69,6 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
             mLog.error("Error during dialogue", exception);
             status = STATUS_ERROR;
             JsonUtils.add(resultObjectBuilder, CAUSE_PROPERTY, ResultUtils.toJson(exception));
-            return new VoiceXmlExitTurn(STATUS_ERROR, "com.nuecho.rivr");
         }
 
         JsonUtils.add(resultObjectBuilder, STATUS_PROPERTY, status);
