@@ -83,7 +83,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         if (login() == null) return STATUS_INVALID_USER;
 
         // C03
-        DtmfRecognitionConfiguration dtmfConfig = dtmfBargIn(1);
+        DtmfRecognitionConfiguration dtmfConfig = dtmfBargeIn(1);
         InteractionTurn mainMenu = newInteractionBuilder("main-menu").addPrompt(dtmfConfig,
                                                                                 audio("vm-youhave"),
                                                                                 synthesis("1"),
@@ -95,17 +95,17 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
                                                                                 audio("vm-opts"))
                                                                      .build(dtmfConfig, DEFAULT_TIMEOUT);
 
-        String menu;
+        String selection;
         do {
-            menu = processDtmfTurn(mainMenu);
-            if ("0".equals(menu)) {
+            selection = processDtmfTurn(mainMenu);
+            if ("0".equals(selection)) {
                 mailboxConfigure();
-            } else if ("1".equals(menu)) {
+            } else if ("1".equals(selection)) {
                 messageMenu();
-            } else if ("3".equals(menu)) {
+            } else if ("3".equals(selection)) {
                 advancedOptions();
             }
-        } while (!"#".equals(menu));
+        } while (!"#".equals(selection));
 
         // C50
         processTurn(audio("good-bye", "vm-goodbye"));
@@ -276,7 +276,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
         return new Recording(audioPath(audioName));
     }
 
-    private DtmfRecognitionConfiguration dtmfBargIn(int dtmfLength) {
+    private DtmfRecognitionConfiguration dtmfBargeIn(int dtmfLength) {
         GrammarReference grammarReference = new GrammarReference("builtin:dtmf/digits?length=" + dtmfLength);
         DtmfRecognitionConfiguration dtmfConfig = new DtmfRecognitionConfiguration(grammarReference);
         dtmfConfig.setTermChar("A");
@@ -295,7 +295,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
     }
 
     private InteractionTurn audioWithDtmf(String interactionName, String audio, int dtmfLength, TimeValue noInputTimeout) {
-        DtmfRecognitionConfiguration dtmfconfig = dtmfBargIn(dtmfLength);
+        DtmfRecognitionConfiguration dtmfconfig = dtmfBargeIn(dtmfLength);
         return newInteractionBuilder(interactionName).addPrompt(dtmfconfig, audio(audio)).build(dtmfconfig,
                                                                                                 noInputTimeout);
     }
