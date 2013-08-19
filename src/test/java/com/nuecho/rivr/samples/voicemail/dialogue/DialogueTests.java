@@ -37,7 +37,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void loginIncorrect() throws Exception {
+    public void loginIncorrect() {
         assertLastInteractionName("ask-login");
         sendDtmfAnswer("4069");
         assertLastInteractionName("ask-password");
@@ -51,7 +51,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void exitOnPound() throws Exception {
+    public void exitOnPound() {
         login();
         sendDtmfAnswer("#");
         assertLastInteractionName("good-bye");
@@ -60,7 +60,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void changeMailboxName() throws Exception {
+    public void changeMailboxName() {
         login();
         sendDtmfAnswer("0");
         assertLastInteractionName("mailbox-options");
@@ -78,7 +78,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void dialOut() throws Exception {
+    public void dialOut() {
         login();
         sendDtmfAnswer("3");
         assertLastInteractionName("advanced-options");
@@ -90,7 +90,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void leaveMessage() throws Exception {
+    public void leaveMessage() {
         login();
         sendDtmfAnswer("3");
         assertLastInteractionName("advanced-options");
@@ -104,7 +104,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void leaveMessageInvalidExtension() throws Exception {
+    public void leaveMessageInvalidExtension() {
         login();
         sendDtmfAnswer("3");
         sendDtmfAnswer("5");
@@ -116,7 +116,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void listenMessage() throws Exception {
+    public void listenMessage() {
         login();
         sendDtmfAnswer("1");
         assertLastInteractionName("play-message");
@@ -126,7 +126,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void listenMessageExit() throws Exception {
+    public void listenMessageExit() {
         login();
         sendDtmfAnswer("1");
         mChannel.processNoInput();
@@ -136,7 +136,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void navigateCallPrevious() throws Exception {
+    public void navigateCallPrevious() {
         login();
         sendDtmfAnswer("1");
         mChannel.processNoInput();
@@ -148,7 +148,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void navigateCallReplay() throws Exception {
+    public void navigateCallReplay() {
         login();
         sendDtmfAnswer("1");
         mChannel.processNoInput();
@@ -160,7 +160,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void navigateCallNext() throws Exception {
+    public void navigateCallNext() {
         login();
         sendDtmfAnswer("1");
         mChannel.processNoInput();
@@ -172,7 +172,7 @@ public class DialogueTests {
     }
 
     @Test
-    public void saveMessage() throws Exception {
+    public void saveMessage() {
         login();
         sendDtmfAnswer("1");
         mChannel.processNoInput();
