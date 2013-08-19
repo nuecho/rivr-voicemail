@@ -22,7 +22,6 @@
 
   <root level="TRACE">
     <appender-ref ref="consoleAppender" />
-    <appender-ref ref="logglyAppender" />
   </root>
 
 </configuration>
