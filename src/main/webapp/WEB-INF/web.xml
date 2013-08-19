@@ -6,7 +6,7 @@
 
 <web-app>
 
-  <display-name>Rivr Hello World</display-name>
+  <display-name>Rivr Voice Mail</display-name>
 
   <servlet>
     <servlet-name>Dialogue</servlet-name>
