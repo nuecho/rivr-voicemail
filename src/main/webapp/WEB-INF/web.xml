@@ -13,22 +13,22 @@
     <servlet-class>com.nuecho.rivr.voicexml.servlet.VoiceXmlDialogueServlet</servlet-class>
 
     <init-param>
-      <param-name>dialogue.class</param-name>
+      <param-name>com.nuecho.rivr.voicexml.dialogue.class</param-name>
       <param-value>com.nuecho.rivr.samples.voicemail.dialogue.VoicemailDialogue</param-value>
     </init-param>
 
     <init-param>
-      <param-name>sessionScanPeriod</param-name>
+      <param-name>com.nuecho.rivr.voicexml.sessionScanPeriod</param-name>
       <param-value>2m</param-value>
     </init-param>
 
     <init-param>
-      <param-name>sessionTimeout</param-name>
+      <param-name>com.nuecho.rivr.voicexml.sessionTimeout</param-name>
       <param-value>30m</param-value>
     </init-param>
 
     <init-param>
-      <param-name>dialogueTimeout</param-name>
+      <param-name>com.nuecho.rivr.voicexml.dialogueTimeout</param-name>
       <param-value>5m</param-value>
     </init-param>
 
