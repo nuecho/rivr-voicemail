@@ -15,18 +15,18 @@ import com.nuecho.rivr.voicexml.turn.output.interaction.*;
  * @author Nu Echo Inc.
  */
 public class DialogueChannelLastInteractionMatcher extends BaseMatcher<VoiceXmlTestDialogueChannel> {
-    private Matcher<InteractionTurn> mTurnMatcher;
+    private final Matcher<Interaction> mTurnMatcher;
 
-    public DialogueChannelLastInteractionMatcher(Matcher<InteractionTurn> matcher) {
+    public DialogueChannelLastInteractionMatcher(Matcher<Interaction> matcher) {
         mTurnMatcher = matcher;
     }
 
     @Override
     public boolean matches(Object arg0) {
-        if (!(arg0 instanceof VoiceXmlTestDialogueChannel)) { return false; }
+        if (!(arg0 instanceof VoiceXmlTestDialogueChannel)) return false;
         VoiceXmlTestDialogueChannel channel = (VoiceXmlTestDialogueChannel) arg0;
 
-        return mTurnMatcher.matches(channel.getLastInteractionTurn());
+        return mTurnMatcher.matches(channel.getLastInteraction());
     }
 
     @Override

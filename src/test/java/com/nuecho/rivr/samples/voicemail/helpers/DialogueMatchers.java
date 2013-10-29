@@ -21,10 +21,10 @@ public final class DialogueMatchers {
      * 
      * @param name The name of the interaction.
      */
-    public static Matcher<InteractionTurn> nameIs(String name) {
-        return new InteractionTurnNameMatcher(name);
+    public static Matcher<Interaction> nameIs(String name) {
+        return new InteractionNameMatcher(name);
     }
-    
+
     /**
      * Match the last interaction turn made on the channel with the supplied
      * name.
@@ -40,7 +40,7 @@ public final class DialogueMatchers {
      * 
      * @param matcher The matcher to apply to the last interaction.
      */
-    public static Matcher<VoiceXmlTestDialogueChannel> lastInteraction(Matcher<InteractionTurn> matcher) {
+    public static Matcher<VoiceXmlTestDialogueChannel> lastInteraction(Matcher<Interaction> matcher) {
         return new DialogueChannelLastInteractionMatcher(matcher);
     }
 

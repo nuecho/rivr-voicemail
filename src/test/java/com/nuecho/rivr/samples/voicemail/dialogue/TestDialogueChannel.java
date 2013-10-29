@@ -87,7 +87,7 @@ public class TestDialogueChannel extends ExternalResource {
     }
 
     public final Step<VoiceXmlOutputTurn, VoiceXmlLastTurn> processScriptExecutionTurn(JsonValue value) {
-        return mDialogueChannel.processScriptExecutionTurn(value);
+        return mDialogueChannel.processScript(value);
     }
 
     public Step<VoiceXmlOutputTurn, VoiceXmlLastTurn> processValue(JsonValue value) {
