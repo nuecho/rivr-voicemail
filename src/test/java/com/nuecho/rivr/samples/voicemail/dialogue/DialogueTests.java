@@ -6,11 +6,14 @@ package com.nuecho.rivr.samples.voicemail.dialogue;
 
 import static com.nuecho.rivr.samples.voicemail.helpers.DialogueMatchers.*;
 
+import java.util.*;
+
 import org.junit.*;
 
 import com.nuecho.rivr.core.dialogue.*;
 import com.nuecho.rivr.core.util.*;
 import com.nuecho.rivr.voicexml.dialogue.*;
+import com.nuecho.rivr.voicexml.servlet.*;
 import com.nuecho.rivr.voicexml.turn.input.*;
 import com.nuecho.rivr.voicexml.util.json.*;
 
@@ -20,12 +23,12 @@ import com.nuecho.rivr.voicexml.util.json.*;
 public class DialogueTests {
 
     @Rule
-    private TestDialogueChannel mChannel;
+    private final TestDialogueChannel mChannel;
 
     public DialogueTests() throws DialogueFactoryException {
         mChannel = new TestDialogueChannel(new SimpleVoiceXmlDialogueFactory(VoicemailDialogue.class));
     }
-    
+
     @Test
     public void loginSuccess() {
         assertLastInteractionName("ask-login");
@@ -200,8 +203,8 @@ public class DialogueTests {
     }
 
     private void sendRecording() {
-        RecordingData recordingData = new RecordingData(new byte[0], "audio/x-wav", "name");
-        RecordingInfo recordingInfo = new RecordingInfo(recordingData, TimeValue.seconds(5), false, "#");
+        FileUpload file = new FileUpload("name", "audio/x-wav", new byte[0], new HashMap<String, String>());
+        RecordingInfo recordingInfo = new RecordingInfo(file, TimeValue.seconds(5), false, "#");
         mChannel.processRecording(recordingInfo);
     }
 
