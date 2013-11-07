@@ -204,7 +204,7 @@ public class DialogueTests {
 
     private void sendRecording() {
         FileUpload file = new FileUpload("name", "audio/x-wav", new byte[0], new HashMap<String, String>());
-        RecordingInfo recordingInfo = new RecordingInfo(file, TimeValue.seconds(5), false, "#");
+        RecordingInfo recordingInfo = new RecordingInfo(file, Duration.seconds(5), false, "#");
         mChannel.processRecording(recordingInfo);
     }
 

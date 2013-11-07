@@ -16,7 +16,6 @@ import com.nuecho.rivr.core.channel.synchronous.step.*;
 import com.nuecho.rivr.core.dialogue.*;
 import com.nuecho.rivr.core.util.*;
 import com.nuecho.rivr.voicexml.dialogue.*;
-import com.nuecho.rivr.voicexml.rendering.voicexml.*;
 import com.nuecho.rivr.voicexml.test.*;
 import com.nuecho.rivr.voicexml.turn.first.*;
 import com.nuecho.rivr.voicexml.turn.input.*;
@@ -29,14 +28,14 @@ import com.nuecho.rivr.voicexml.turn.output.*;
 public class TestDialogueChannel extends ExternalResource {
     private final Logger mLogger;
     private final VoiceXmlDialogueFactory mFactory;
-    private final TimeValue mTimeout;
+    private final Duration mTimeout;
     private VoiceXmlTestDialogueChannel mDialogueChannel;
 
     public TestDialogueChannel(VoiceXmlDialogueFactory factory) {
-        this(factory, TimeValue.seconds(10), null);
+        this(factory, Duration.seconds(10), null);
     }
 
-    public TestDialogueChannel(VoiceXmlDialogueFactory factory, TimeValue timeout, Logger logger) {
+    public TestDialogueChannel(VoiceXmlDialogueFactory factory, Duration timeout, Logger logger) {
         mFactory = factory;
         mTimeout = timeout;
         if (logger == null) {
@@ -107,7 +106,7 @@ public class TestDialogueChannel extends ExternalResource {
     }
 
     public final Step<VoiceXmlOutputTurn, VoiceXmlLastTurn> processInputTurn(VoiceXmlInputTurn inputTurn,
-                                                                             TimeValue timeout) {
+                                                                             Duration timeout) {
         return mDialogueChannel.processInputTurn(inputTurn, timeout);
     }
 

@@ -8,7 +8,7 @@ import static java.lang.String.*;
 
 import org.hamcrest.*;
 
-import com.nuecho.rivr.voicexml.turn.output.interaction.*;
+import com.nuecho.rivr.voicexml.turn.output.*;
 
 /**
  * @author Nu Echo Inc.

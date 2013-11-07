@@ -8,7 +8,7 @@ import org.hamcrest.*;
 
 import com.nuecho.rivr.core.channel.*;
 import com.nuecho.rivr.voicexml.test.*;
-import com.nuecho.rivr.voicexml.turn.output.interaction.*;
+import com.nuecho.rivr.voicexml.turn.output.*;
 
 /**
  * @author Nu Echo Inc.

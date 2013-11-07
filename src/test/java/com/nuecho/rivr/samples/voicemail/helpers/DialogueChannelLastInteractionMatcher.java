@@ -7,7 +7,7 @@ package com.nuecho.rivr.samples.voicemail.helpers;
 import org.hamcrest.*;
 
 import com.nuecho.rivr.voicexml.test.*;
-import com.nuecho.rivr.voicexml.turn.output.interaction.*;
+import com.nuecho.rivr.voicexml.turn.output.*;
 
 /**
  * Match the last interaction turn made on the channel with a matcher.
