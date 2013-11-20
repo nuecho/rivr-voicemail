@@ -4,7 +4,7 @@
 
 package com.nuecho.rivr.samples.voicemail.dialogue;
 
-import static com.nuecho.rivr.voicexml.turn.OutputTurns.*;
+import static com.nuecho.rivr.voicexml.turn.output.OutputTurns.*;
 import static java.lang.String.*;
 
 import java.util.regex.*;
