@@ -17,7 +17,7 @@ public final class DialogueMatchers {
     private DialogueMatchers() {}
 
     /**
-     * Match the interaction with the supplied name.
+     * Matches the interaction with the supplied name.
      * 
      * @param name The name of the interaction.
      */
@@ -26,7 +26,7 @@ public final class DialogueMatchers {
     }
 
     /**
-     * Match the last interaction turn made on the channel with the supplied
+     * Matches the last interaction turn made on the channel with the supplied
      * name.
      * 
      * @param name The expected name of the last interaction.
@@ -36,7 +36,7 @@ public final class DialogueMatchers {
     }
 
     /**
-     * Match the last interaction turn made on the channel with a matcher.
+     * Matches the last interaction turn made on the channel with a matcher.
      * 
      * @param matcher The matcher to apply to the last interaction.
      */
@@ -45,7 +45,7 @@ public final class DialogueMatchers {
     }
 
     /**
-     * Match a dialogue that its execution is complete, ie the dialogue
+     * Matches a dialogue that its execution is complete, ie the dialogue
      * associated with it returned a {@link LastTurn}.
      */
     public static Matcher<VoiceXmlTestDialogueChannel> isDone() {
