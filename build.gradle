@@ -22,6 +22,6 @@ dependencies {
     compile 'com.nuecho:rivr-voicexml:0.9.3'
     providedCompile 'javax.servlet:servlet-api:2.5'
     testCompile 'junit:junit:4.10'
-    runtime 'org.glassfish:javax.json:1.0.1'
+    runtime 'org.glassfish:javax.json:1.0.3'
     runtime 'org.logback-extensions:logback-ext-loggly:0.1.1'
 }
