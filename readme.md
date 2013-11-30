@@ -23,7 +23,7 @@ You may also directly import the Gradle project from **File** > **Import** > **G
 
 ## Demo 
 
-An instance of this application is currently deployed over Amazon Beanstalk (http://rivr-voicemail.elasticbeanstalk.com/dialogue/) 
+An instance of this application is currently deployed over Heroku (http://rivr-voicemail.herokuapp.com/dialogue/) 
 and reacheable from the Voxeo's Hosted Platform
 
     skype: 990009369991420387
