@@ -1,7 +1,7 @@
 apply plugin: 'jetty'
 apply plugin: 'eclipse'
 
-version = '0.9.3'
+version = '1.0.0'
 
 repositories {
     mavenLocal()
@@ -19,7 +19,7 @@ war {
 sourceCompatibility = '1.6'
 
 dependencies {
-    compile 'com.nuecho:rivr-voicexml:0.9.3'
+    compile 'com.nuecho:rivr-voicexml:1.0.0'
     providedCompile 'javax.servlet:servlet-api:2.5'
     testCompile 'junit:junit:4.10'
     runtime 'org.glassfish:javax.json:1.0.3'
