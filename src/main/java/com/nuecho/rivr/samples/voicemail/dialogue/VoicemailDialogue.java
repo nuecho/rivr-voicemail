@@ -4,10 +4,8 @@
 
 package com.nuecho.rivr.samples.voicemail.dialogue;
 
-import static com.nuecho.rivr.voicexml.turn.output.OutputTurns.*;
-import static java.lang.String.*;
-
-import java.util.regex.*;
+import static com.nuecho.rivr.voicexml.turn.output.OutputTurns.interaction;
+import static java.lang.String.format;
 
 import javax.json.*;
 
@@ -43,7 +41,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
     private static final String CAUSE_PROPERTY = "cause";
 
-    private static final Pattern DNIS = Pattern.compile(".*:([0-9]*)@.*:.*");
+    private static final String ROBOT_MODE_DNIS_PREFIX = "495";
 
     private static final String RECORDING_LOCATION = "application.recording";
 
@@ -121,10 +119,7 @@ public final class VoicemailDialogue implements VoiceXmlDialogue {
 
         if (result != null) {
             String dnis = result.getString("dnis");
-            Matcher matcher = DNIS.matcher(dnis);
-            if (!matcher.matches()) throw new IllegalArgumentException(format("Received invalid dnis [%s]", dnis));
-            String extension = matcher.group(1);
-            mNuBotMode = extension.startsWith("495");
+            mNuBotMode = dnis.startsWith("495");
             if (mNuBotMode) {
                 mLog.info("Running dialogue in NuBot mode (instrumented prompts)");
             }
